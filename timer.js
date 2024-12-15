@@ -4,6 +4,7 @@ const SVG_SIZE = 100;
 const STROKE_WIDTH = 4;
 const INNER_RADIUS = (SVG_SIZE / 2) - (STROKE_WIDTH * 2);
 const PROGRESS_RADIUS = (SVG_SIZE / 2) - (STROKE_WIDTH / 2); // Larger radius for progress ring
+const svgNamespace = "http://www.w3.org/2000/svg";
 
 // Add this helper function near the top with other constants
 function formatTime(seconds) {
@@ -55,8 +56,28 @@ export function createTimer(container, duration = 10, color = selectedColor, hea
   timerElement.dataset.color = color; // Add color to dataset
   timerElement.dataset.selected = "false";  // Add selected state
 
+  // Create SVG elements for the state icons (play/pause)
+  const stateIconSvg = document.createElementNS(svgNamespace, "svg");
+  stateIconSvg.classList.add("absolute", "inset-0", "w-full", "h-full", "pointer-events-none", "state-icon");
+  stateIconSvg.setAttribute("viewBox", "0 0 100 100");
+
+  // Create play icon path
+  const playPath = document.createElementNS(svgNamespace, "path");
+  playPath.classList.add("play-icon", "hidden");
+  playPath.setAttribute("d", "M35 25L75 50L35 75V25Z");
+  playPath.setAttribute("fill", "currentColor");
+
+  // Create pause icon path
+  const pausePath = document.createElementNS(svgNamespace, "path");
+  pausePath.classList.add("pause-icon");
+  pausePath.setAttribute("d", "M35 25H45V75H35V25ZM65 25H55V75H65V25Z");
+  pausePath.setAttribute("fill", "currentColor");
+
+  stateIconSvg.appendChild(playPath);
+  stateIconSvg.appendChild(pausePath);
+  timerElement.appendChild(stateIconSvg);
+
   // Create SVG elements for the progress ring
-  const svgNamespace = "http://www.w3.org/2000/svg";
   const svg = document.createElementNS(svgNamespace, "svg");
   svg.classList.add("absolute", "inset-0", "w-full", "h-full");
   svg.setAttribute("viewBox", "0 0 100 100");  // Add viewBox for consistent scaling
@@ -90,12 +111,6 @@ export function createTimer(container, duration = 10, color = selectedColor, hea
     headerText.textContent = header;
     textWrapper.appendChild(headerText);
   }
-  
-  // Add status text
-  const statusText = document.createElement("div");
-  statusText.className = "text-sm text-gray-500 mb-2";
-  statusText.textContent = "Paused";
-  textWrapper.appendChild(statusText);
   
   // Add timer text
   const timerText = document.createElement("span");
@@ -137,6 +152,19 @@ export function createTimer(container, duration = 10, color = selectedColor, hea
   // const circumference = 2 * Math.PI * 45;
   // progressCircle.setAttribute("stroke-dasharray", circumference);
   // progressCircle.setAttribute("stroke-dashoffset", "0");
+}
+
+// Move updateIconState outside of createTimer
+function updateIconState(timerElement, running) {
+  const playIcon = timerElement.querySelector('.play-icon');
+  const pauseIcon = timerElement.querySelector('.pause-icon');
+  if (running) {
+    playIcon.classList.remove('hidden');
+    pauseIcon.classList.add('hidden');
+  } else {
+    playIcon.classList.add('hidden');
+    pauseIcon.classList.remove('hidden');
+  }
 }
 
 export function toggleTimer(timerElement) {
@@ -182,15 +210,12 @@ function startTimer(timerElement) {
   const startTime = performance.now();
   const color = timerElement.dataset.color;
   timerElement.style.borderColor = color;
-  const circle = timerElement.querySelector("circle"); // Changed selector
-  circle.setAttribute("stroke", color);
+  const circle = timerElement.querySelector("circle");
+  circle.setAttribute("stroke", color);  // This line was already correct
 
   // Add pulse animation
   timerElement.classList.add('timer-pulse');
   setTimeout(() => timerElement.classList.remove('timer-pulse'), 500);
-
-  // Update status text
-  timerElement.querySelector('.text-sm.text-gray-500').textContent = "Running";
 
   const interval = setInterval(() => {
     const elapsed = (performance.now() - startTime) / 1000;
@@ -217,6 +242,7 @@ function startTimer(timerElement) {
   }, 1000 / 60);
 
   timerElement.dataset.intervalId = interval;
+  updateIconState(timerElement, true); // Update to pass timerElement
 }
 
 function stopTimer(timerElement) {
@@ -224,16 +250,15 @@ function stopTimer(timerElement) {
   clearInterval(timerElement.dataset.intervalId);
   timerElement.classList.add('timer-inactive'); // Add inactive state
   const grayColor = "#cbd5e1";
-  const circle = timerElement.querySelector("circle"); // Changed selector
-  circle.setAttribute("stroke", grayColor);
+  const circle = timerElement.querySelector("circle");
+  circle.setAttribute("stroke", grayColor);  // This makes the progress ring match the border
   timerElement.style.borderColor = grayColor;
 
   // Add pulse animation
   timerElement.classList.add('timer-pulse');
   setTimeout(() => timerElement.classList.remove('timer-pulse'), 500);
 
-  // Update status text
-  timerElement.querySelector('.text-sm.text-gray-500').textContent = "Paused";
+  updateIconState(timerElement, false); // Update to pass timerElement
 }
 
 // Update timer state styles to use the timer's initial color

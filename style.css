@@ -228,22 +228,108 @@ input {
 #delete-selected.show {
   opacity: 1;
   pointer-events: auto;
-  transform: translateX(-3rem); /* Adjust based on select button width (48px) */
+  transform: translateX(-6rem);
   right: calc(1rem + 3rem); /* Position relative to select button */
 }
 
-/* State icon styles */
-.timer .play-icon,
-.timer .pause-icon {
-  opacity: 0.08;
-  transition: opacity 0.3s ease;
-  position: absolute;
-  z-index: 0;
+/* ...existing code... */
+
+#select-all, #delete-selected {
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s ease;
+  position: fixed;
+  top: 1rem;
 }
 
-.timer:hover .play-icon,
-.timer:hover .pause-icon {
-  opacity: 0.12;
+#select-all.show {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-3rem);
+}
+
+#delete-selected.show {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-6rem);
+}
+
+/* Update select mode button styles */
+#select-mode-toggle,
+#select-all,
+#delete-selected {
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s ease;
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+}
+
+#select-mode-toggle {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+#select-all.show {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-3rem);
+  right: calc(1rem + 3rem);
+}
+
+#delete-selected.show {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-6rem);
+  right: calc(1rem + 6rem);
+}
+
+/* State icon styles - update these styles */
+.state-icon {
+  color: #cbd5e1;
+  opacity: 0.2;
+  transform: scale(1.5);
+  pointer-events: none;
+  z-index: 1;
+  position: absolute;
+  inset: 0;
+}
+
+.timer[data-running="true"] .state-icon {
+  color: currentColor;
+  opacity: 0.2;
+}
+
+.timer:hover .state-icon {
+  opacity: 0.3;
+}
+
+/* Update color for inactive state */
+.timer.timer-inactive .state-icon {
+  color: #cbd5e1;
+}
+
+/* Update z-index stacking */
+.timer circle {
+  stroke-width: 4;
+  stroke-linecap: round;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+  transition: stroke-dashoffset 0.3s ease, stroke 0.3s ease;
+  position: relative;
+  z-index: 0;
+  opacity: 1;  /* Ensure full opacity */
+}
+
+.timer .flex {
+  position: relative;
+  z-index: 2;
+}
+
+/* visibility utilities */
+.hidden {
+  display: none !important;
 }
 
 /* Update the z-index of the timer content */
@@ -252,22 +338,7 @@ input {
   z-index: 1;
 }
 
-.hidden {
-  display: none;
-}
-
 /* Update the timer ring styles */
-.timer circle {
-  stroke: #3498db;
-  stroke-width: 4;
-  stroke-linecap: round;
-  transform: rotate(-90deg);
-  transform-origin: 50% 50%;
-  transition: stroke-dashoffset 0.3s ease;
-  position: relative;
-  z-index: 2;
-}
-
 .timer svg {
   position: absolute;
   width: 120%;

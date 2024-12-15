@@ -89,16 +89,32 @@ document.getElementById('select-mode-toggle').addEventListener('click', function
   // Toggle button states
   const addButton = document.getElementById('add-timer');
   const syncButton = document.getElementById('single-timer-mode');
+  const selectAllButton = document.getElementById('select-all');
+  const deleteButton = document.getElementById('delete-selected');
   
+  // Disable/enable main buttons
   addButton.disabled = isActive;
   addButton.classList.toggle('pointer-events-none', isActive);
-  
   syncButton.disabled = isActive;
   syncButton.classList.toggle('pointer-events-none', isActive);
   
+  // Show/hide selection mode buttons
+  selectAllButton.classList.toggle('show', isActive);
+  deleteButton.classList.toggle('show', isActive);
+  
   document.body.classList.toggle('select-mode-active', isActive);
-  document.getElementById('delete-selected').classList.toggle('show', isActive);
   setSelectMode(isActive);
+});
+
+// Add select all button handler
+document.getElementById('select-all').addEventListener('click', () => {
+  const allTimers = document.querySelectorAll('.timer');
+  const allSelected = Array.from(allTimers).every(timer => timer.dataset.selected === "true");
+  
+  allTimers.forEach(timer => {
+    timer.dataset.selected = (!allSelected).toString();
+    timer.classList.toggle('selected', !allSelected);
+  });
 });
 
 document.getElementById('delete-selected').addEventListener('click', () => {
