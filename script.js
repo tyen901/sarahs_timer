@@ -121,6 +121,7 @@ document.getElementById('delete-selected').addEventListener('click', () => {
     selectModeToggle.classList.remove('active', 'bg-blue-500', 'text-white');
     document.body.classList.remove('select-mode-active');
     document.getElementById('delete-selected').classList.remove('show');
+    document.getElementById('select-all').classList.remove('show');
     
     // Re-enable buttons
     const addButton = document.getElementById('add-timer');
