@@ -10,6 +10,8 @@
   justify-content: center;
   align-items: center; /* Center the button vertically */
   z-index: 1000;
+  gap: 1rem;
+  padding: 0 1rem;
 }
 
 /* Style the 'Add Timer' button */
@@ -31,4 +33,35 @@
 .timer {
   min-width: 200px;
   min-height: 200px;
+  transition: all 0.3s ease;
+}
+
+/* Style the toggle switch */
+.single-timer-toggle input:checked ~ .dot {
+  transform: translateX(100%);
+}
+
+.single-timer-toggle input:checked + .block {
+  background-color: #3498db;
+}
+
+/* Timer state styles */
+.timer[data-running="true"] {
+  box-shadow: 0 0 15px rgba(52, 152, 219, 0.5);
+}
+
+.timer[data-running="true"] circle:nth-child(2) {
+  stroke: #3498db;
+}
+
+.timer[data-remaining="0"] {
+  box-shadow: 0 0 15px rgba(46, 204, 113, 0.5);
+}
+
+.timer[data-remaining="0"] circle:nth-child(2) {
+  stroke: #2ecc71;
+}
+
+.timer[data-remaining="0"] span {
+  color: #2ecc71;
 }

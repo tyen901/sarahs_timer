@@ -2,6 +2,14 @@ import { createTimer, toggleTimer } from './timer.js';
 
 const timerContainer = document.getElementById("timer-container");
 const addTimerButton = document.getElementById("add-timer");
+const singleTimerToggle = document.getElementById("single-timer-mode");
+
+// Add toggle state tracking
+let singleTimerMode = false;
+
+singleTimerToggle.addEventListener("change", (e) => {
+  singleTimerMode = e.target.checked;
+});
 
 // Add timer on button click
 addTimerButton.addEventListener("click", () => {
@@ -17,3 +25,6 @@ document.addEventListener('DOMContentLoaded', () => {
     createTimer(timerContainer);
   }
 });
+
+// Export the state for use in timer.js
+export { singleTimerMode };

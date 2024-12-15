@@ -1,3 +1,5 @@
+import { singleTimerMode } from './script.js';
+
 const SVG_SIZE = 100;
 const STROKE_WIDTH = 4;
 const RADIUS = (SVG_SIZE / 2) - (STROKE_WIDTH * 2); // Accounts for stroke width
@@ -66,6 +68,17 @@ export function createTimer(container, duration = 10) {
 
 export function toggleTimer(timerElement) {
   const running = timerElement.dataset.running === "true";
+  
+  if (singleTimerMode && !running) {
+    // Stop all other timers first
+    const allTimers = document.querySelectorAll('.timer');
+    allTimers.forEach(timer => {
+      if (timer !== timerElement && timer.dataset.running === "true") {
+        stopTimer(timer);
+      }
+    });
+  }
+
   if (running) {
     stopTimer(timerElement);
   } else {
@@ -92,6 +105,13 @@ function startTimer(timerElement) {
     if (newRemaining <= 0) {
       clearInterval(interval);
       timerElement.dataset.running = "false";
+      // Play completion animation
+      gsap.to(timerElement, {
+        scale: 1.1,
+        duration: 0.2,
+        yoyo: true,
+        repeat: 1
+      });
     }
   }, 1000 / 60);
 
@@ -108,7 +128,7 @@ function updateProgress(timerElement, progress) {
   const circumference = 2 * Math.PI * RADIUS;
   // Modify the dashOffset calculation to fill up
   const dashOffset = ((100 - progress) / 100) * circumference;
-  circle.style.transition = 'stroke-dashoffset 0.1s ease-out';
+  circle.style.transition = 'stroke-dashoffset 0.1s ease-out, stroke 0.3s ease';
   circle.setAttribute("stroke-dasharray", circumference);
   circle.setAttribute("stroke-dashoffset", dashOffset);
 }
