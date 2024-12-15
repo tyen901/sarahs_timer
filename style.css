@@ -1,39 +1,68 @@
-/* Add styles for the fixed menu bar */
+/* Remove old menu bar styles */
 .menu-bar {
-  position: fixed;
-  bottom: 0;
-  width: 100%;
-  height: 60px; /* Fixed height */
-  background-color: #fff;
-  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
-  display: flex;
-  justify-content: center;
-  align-items: center; /* Center the button vertically */
-  z-index: 1000;
-  gap: 1rem;
-  padding: 0 1rem;
+  display: none;
 }
 
-/* Style the 'Add Timer' button */
+/* Add Timer button styles */
 #add-timer {
-  background-color: #3498db;
-  color: #fff;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 5px;
-  cursor: pointer;
-  transition: background-color 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
 }
 
-#add-timer:hover {
-  background-color: #2980b9;
+#add-timer:active {
+  transform: scale(0.95);
+}
+
+/* Toggle button styles */
+#single-timer-mode {
+  opacity: 0.9;
+}
+
+#single-timer-mode.active {
+  background-color: #3498db;
+}
+
+#single-timer-mode.active svg {
+  color: white;
 }
 
 /* Ensure timers resize to fill available space with a minimum size */
 .timer {
+  width: min(45vh, 45vw);
+  height: min(45vh, 45vw);
   min-width: 200px;
   min-height: 200px;
+  max-width: 350px;
+  max-height: 350px;
+  border-radius: 50%;
+  margin: 0 auto;
   transition: all 0.3s ease;
+}
+
+#timer-container {
+  place-items: center;
+  margin: 0 auto;
+  width: 100%;
+  padding: 4vh;
+  gap: 4vh;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  #timer-container {
+    grid-template-columns: 1fr;
+  }
+  
+  .timer {
+    min-width: 250px;
+    min-height: 250px;
+  }
+}
+
+@media (min-width: 769px) {
+  #timer-container {
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    max-width: 1400px;
+  }
 }
 
 /* Style the toggle switch */
@@ -64,4 +93,50 @@
 
 .timer[data-remaining="0"] span {
   color: #2ecc71;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+    box-shadow: 0 0 15px rgba(46, 204, 113, 0.5);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 20px rgba(46, 204, 113, 0.7);
+  }
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 15px rgba(46, 204, 113, 0.5);
+  }
+}
+
+.timer-completed {
+  animation: pulse 2s ease-in-out infinite;
+}
+
+/* Modal styles */
+.modal {
+  z-index: 1100;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+
+.modal.show {
+  opacity: 1;
+}
+
+.modal-content {
+  transform: scale(0.95);
+  transition: transform 0.3s ease;
+}
+
+.modal.show .modal-content {
+  transform: scale(1);
+}
+
+/* Form input styles */
+input {
+  border: 1px solid #e2e8f0;
+  padding: 0.5rem;
+  width: 100%;
 }

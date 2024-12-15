@@ -1,17 +1,34 @@
-import { singleTimerMode } from './script.js';
+import { singleTimerMode, selectedColor } from './script.js';
 
 const SVG_SIZE = 100;
 const STROKE_WIDTH = 4;
 const RADIUS = (SVG_SIZE / 2) - (STROKE_WIDTH * 2); // Accounts for stroke width
 
-export function createTimer(container, duration = 10) {
+// Add this helper function near the top with other constants
+function formatTime(seconds) {
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = Math.floor(seconds % 60);
+  return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
+}
+
+export function createTimer(container, duration = 10, color = selectedColor, header = "") {
   const timerElement = document.createElement("div");
   timerElement.className =
-    "timer w-32 h-32 bg-white shadow-xl rounded-full flex items-center justify-center relative overflow-hidden hover:scale-105 transition-transform";
+    "timer bg-white shadow-2xl rounded-full flex items-center justify-center relative overflow-hidden hover:scale-105 transition-transform";
   timerElement.dataset.id = Date.now();
   timerElement.dataset.duration = duration;
   timerElement.dataset.remaining = duration;
   timerElement.dataset.running = "false";
+  // Add completed state to initial data attributes
+  timerElement.dataset.completed = "false";
+
+  // Add header if provided
+  if (header) {
+    const headerElement = document.createElement("div");
+    headerElement.className = "absolute top-0 left-0 w-full text-center -mt-8 text-gray-700 font-medium";
+    headerElement.textContent = header;
+    timerElement.appendChild(headerElement);
+  }
 
   // Create SVG elements for the progress ring
   const svgNamespace = "http://www.w3.org/2000/svg";
@@ -30,7 +47,7 @@ export function createTimer(container, duration = 10) {
   const progressCircle = document.createElementNS(svgNamespace, "circle");
   progressCircle.setAttribute("cx", SVG_SIZE/2);
   progressCircle.setAttribute("cy", SVG_SIZE/2);
-  progressCircle.setAttribute("stroke", "#3498db");
+  progressCircle.setAttribute("stroke", color);
   progressCircle.setAttribute("stroke-width", STROKE_WIDTH);
   progressCircle.setAttribute("fill", "none");
   progressCircle.setAttribute("r", RADIUS);
@@ -45,7 +62,30 @@ export function createTimer(container, duration = 10) {
   svg.appendChild(progressCircle);
 
   timerElement.appendChild(svg);
-  timerElement.innerHTML += `<span class="text-lg font-semibold">${duration}s</span>`;
+  
+  // Create wrapper for text elements
+  const textWrapper = document.createElement("div");
+  textWrapper.className = "flex flex-col items-center justify-center z-10";
+  
+  // Add header text if provided
+  if (header) {
+    const headerText = document.createElement("div");
+    headerText.className = "text-sm font-medium text-gray-600 mb-1";
+    headerText.textContent = header;
+    textWrapper.appendChild(headerText);
+  }
+  
+  // Add timer text
+  const timerText = document.createElement("span");
+  timerText.className = "text-lg font-semibold flex items-center gap-1";
+  timerText.innerHTML = `
+    <span class="remaining">${formatTime(duration)}</span>
+    <span class="text-sm text-gray-400">/</span>
+    <span class="text-gray-600">${formatTime(duration)}</span>
+  `;
+  textWrapper.appendChild(timerText);
+  
+  timerElement.appendChild(textWrapper);
 
   // Add click event to start/pause the timer
   timerElement.addEventListener("click", () => toggleTimer(timerElement));
@@ -68,6 +108,20 @@ export function createTimer(container, duration = 10) {
 
 export function toggleTimer(timerElement) {
   const running = timerElement.dataset.running === "true";
+  const completed = timerElement.dataset.completed === "true";
+  
+  if (completed) {
+    // Reset the timer when clicking a completed timer
+    timerElement.dataset.completed = "false";
+    timerElement.dataset.remaining = timerElement.dataset.duration;
+    timerElement.classList.remove('timer-completed');
+    updateProgress(timerElement, 0);
+    updateTime(timerElement, timerElement.dataset.duration);
+    return;
+  }
+  
+  // Remove pulse effect when clicked
+  timerElement.classList.remove('timer-completed');
   
   if (singleTimerMode && !running) {
     // Stop all other timers first
@@ -87,6 +141,7 @@ export function toggleTimer(timerElement) {
 }
 
 function startTimer(timerElement) {
+  timerElement.classList.remove('timer-completed'); // Remove pulse if restarting
   timerElement.dataset.running = "true";
   const duration = parseFloat(timerElement.dataset.duration);
   const remaining = parseFloat(timerElement.dataset.remaining);
@@ -105,7 +160,8 @@ function startTimer(timerElement) {
     if (newRemaining <= 0) {
       clearInterval(interval);
       timerElement.dataset.running = "false";
-      // Play completion animation
+      timerElement.dataset.completed = "true";
+      timerElement.classList.add('timer-completed');
       gsap.to(timerElement, {
         scale: 1.1,
         duration: 0.2,
@@ -123,6 +179,7 @@ function stopTimer(timerElement) {
   clearInterval(timerElement.dataset.intervalId);
 }
 
+// Update timer state styles to use the timer's initial color
 function updateProgress(timerElement, progress) {
   const circle = timerElement.querySelector("circle:nth-child(2)");
   const circumference = 2 * Math.PI * RADIUS;
@@ -134,6 +191,5 @@ function updateProgress(timerElement, progress) {
 }
 
 function updateTime(timerElement, time) {
-  const seconds = Math.floor(time);
-  timerElement.querySelector("span").textContent = `${seconds}s`;
+  timerElement.querySelector(".remaining").textContent = formatTime(time);
 }
