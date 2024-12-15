@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Timer Grid</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-gray-100 min-h-screen flex flex-col">
+  <div id="timer-container" class="flex-grow grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 p-4">
+    <!-- Timers will be added dynamically -->
+  </div>
+  <div class="menu-bar">
+    <button id="add-timer" class="px-4 py-2 bg-blue-500 text-white rounded shadow-lg hover:bg-blue-600">
+      Add Timer
+    </button>
+  </div>
+  <script type="module" src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,34 @@
+/* Add styles for the fixed menu bar */
+.menu-bar {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 60px; /* Fixed height */
+  background-color: #fff;
+  box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: center;
+  align-items: center; /* Center the button vertically */
+  z-index: 1000;
+}
+
+/* Style the 'Add Timer' button */
+#add-timer {
+  background-color: #3498db;
+  color: #fff;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+#add-timer:hover {
+  background-color: #2980b9;
+}
+
+/* Ensure timers resize to fill available space with a minimum size */
+.timer {
+  min-width: 200px;
+  min-height: 200px;
+}
