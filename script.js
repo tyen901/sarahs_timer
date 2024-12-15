@@ -76,10 +76,6 @@ document.querySelectorAll('.preset-btn').forEach(button => {
   });
 });
 
-document.addEventListener('DOMContentLoaded', () => {
-
-});
-
 // Add event handlers for the new buttons
 document.getElementById('select-mode-toggle').addEventListener('click', function() {
   const isActive = this.classList.toggle('active');

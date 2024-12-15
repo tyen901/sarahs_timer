@@ -2,7 +2,6 @@ import { singleTimerMode, selectedColor } from './script.js';
 
 const SVG_SIZE = 100;
 const STROKE_WIDTH = 4;
-const INNER_RADIUS = (SVG_SIZE / 2) - (STROKE_WIDTH * 2);
 const PROGRESS_RADIUS = (SVG_SIZE / 2) - (STROKE_WIDTH / 2); // Larger radius for progress ring
 const svgNamespace = "http://www.w3.org/2000/svg";
 
@@ -147,11 +146,6 @@ export function createTimer(container, duration = 10, color = selectedColor, hea
     { opacity: 0, scale: 0.5 },
     { opacity: 1, scale: 1, duration: 0.5, ease: "back.out(1.7)" }
   );
-
-  // Remove this section as we're setting it above
-  // const circumference = 2 * Math.PI * 45;
-  // progressCircle.setAttribute("stroke-dasharray", circumference);
-  // progressCircle.setAttribute("stroke-dashoffset", "0");
 }
 
 // Move updateIconState outside of createTimer
