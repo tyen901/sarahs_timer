@@ -1,4 +1,4 @@
-import { createTimer, toggleTimer } from './timer.js';
+import { createTimer, toggleTimer, setSelectMode, deleteSelectedTimers } from './timer.js';
 
 const timerContainer = document.getElementById("timer-container");
 const addTimerButton = document.getElementById("add-timer");
@@ -76,16 +76,74 @@ document.querySelectorAll('.preset-btn').forEach(button => {
   });
 });
 
-// Create 3 test timers on page load
 document.addEventListener('DOMContentLoaded', () => {
-  const sampleTimers = [
-    { duration: 10, header: "Coffee Break" },
-    { duration: 15, header: "Meditation" },
-    { duration: 5, header: "Quick Stretch" }
+
+});
+
+// Add event handlers for the new buttons
+document.getElementById('select-mode-toggle').addEventListener('click', function() {
+  const isActive = this.classList.toggle('active');
+  this.classList.toggle('bg-blue-500', isActive);
+  this.classList.toggle('text-white', isActive);
+  
+  // Toggle button states
+  const addButton = document.getElementById('add-timer');
+  const syncButton = document.getElementById('single-timer-mode');
+  
+  addButton.disabled = isActive;
+  addButton.classList.toggle('pointer-events-none', isActive);
+  
+  syncButton.disabled = isActive;
+  syncButton.classList.toggle('pointer-events-none', isActive);
+  
+  document.body.classList.toggle('select-mode-active', isActive);
+  document.getElementById('delete-selected').classList.toggle('show', isActive);
+  setSelectMode(isActive);
+});
+
+document.getElementById('delete-selected').addEventListener('click', () => {
+  if (confirm('Are you sure you want to delete the selected timers?')) {
+    deleteSelectedTimers();
+    // Exit select mode and reset button states
+    const selectModeToggle = document.getElementById('select-mode-toggle');
+    selectModeToggle.classList.remove('active', 'bg-blue-500', 'text-white');
+    document.body.classList.remove('select-mode-active');
+    document.getElementById('delete-selected').classList.remove('show');
+    
+    // Re-enable buttons
+    const addButton = document.getElementById('add-timer');
+    const syncButton = document.getElementById('single-timer-mode');
+    addButton.disabled = false;
+    addButton.classList.remove('pointer-events-none');
+    syncButton.disabled = false;
+    syncButton.classList.remove('pointer-events-none');
+    
+    setSelectMode(false);
+  }
+});
+
+// Add test button handler
+document.getElementById('test-mode').addEventListener('click', () => {
+  const randomTimers = [
+    { 
+      duration: Math.floor(Math.random() * 3600) + 60,
+      header: "Test Timer " + Math.floor(Math.random() * 100),
+      color: `#${Math.floor(Math.random()*16777215).toString(16)}`
+    },
+    { 
+      duration: Math.floor(Math.random() * 3600) + 60,
+      header: "Test Timer " + Math.floor(Math.random() * 100),
+      color: `#${Math.floor(Math.random()*16777215).toString(16)}`
+    },
+    { 
+      duration: Math.floor(Math.random() * 3600) + 60,
+      header: "Test Timer " + Math.floor(Math.random() * 100),
+      color: `#${Math.floor(Math.random()*16777215).toString(16)}`
+    }
   ];
   
-  sampleTimers.forEach(timer => {
-    createTimer(timerContainer, timer.duration, selectedColor, timer.header);
+  randomTimers.forEach(timer => {
+    createTimer(timerContainer, timer.duration, timer.color, timer.header);
   });
 });
 

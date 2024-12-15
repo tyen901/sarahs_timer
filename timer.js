@@ -2,7 +2,8 @@ import { singleTimerMode, selectedColor } from './script.js';
 
 const SVG_SIZE = 100;
 const STROKE_WIDTH = 4;
-const RADIUS = (SVG_SIZE / 2) - (STROKE_WIDTH * 2); // Accounts for stroke width
+const INNER_RADIUS = (SVG_SIZE / 2) - (STROKE_WIDTH * 2);
+const PROGRESS_RADIUS = (SVG_SIZE / 2) - (STROKE_WIDTH / 2); // Larger radius for progress ring
 
 // Add this helper function near the top with other constants
 function formatTime(seconds) {
@@ -11,24 +12,48 @@ function formatTime(seconds) {
   return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
 }
 
+// Add at top with other imports
+let isSelectMode = false;
+
+// Add after other constants
+export function setSelectMode(enabled) {
+  isSelectMode = enabled;
+  document.querySelectorAll('.timer').forEach(timer => {
+    if (!enabled) {
+      timer.classList.remove('selected');
+      timer.dataset.selected = "false";
+    }
+  });
+}
+
+export function deleteSelectedTimers() {
+  document.querySelectorAll('.timer[data-selected="true"]').forEach(timer => {
+    gsap.to(timer, {
+      scale: 0,
+      opacity: 0,
+      duration: 0.3,
+      onComplete: () => timer.remove()
+    });
+  });
+}
+
 export function createTimer(container, duration = 10, color = selectedColor, header = "") {
   const timerElement = document.createElement("div");
-  timerElement.className =
-    "timer bg-white shadow-2xl rounded-full flex items-center justify-center relative overflow-hidden hover:scale-105 transition-transform";
+  const grayColor = "#cbd5e1";  // Add this at the top
+  
+  timerElement.className = "timer bg-white shadow-2xl rounded-full flex items-center justify-center relative overflow-visible timer-inactive my-4";
+  timerElement.style.borderWidth = `${STROKE_WIDTH}px`;
+  timerElement.style.borderStyle = "solid";
+  timerElement.style.borderColor = grayColor;
+  timerElement.style.padding = `${STROKE_WIDTH * 2}px`; // Add padding to shrink inner content
   timerElement.dataset.id = Date.now();
   timerElement.dataset.duration = duration;
   timerElement.dataset.remaining = duration;
   timerElement.dataset.running = "false";
   // Add completed state to initial data attributes
   timerElement.dataset.completed = "false";
-
-  // Add header if provided
-  if (header) {
-    const headerElement = document.createElement("div");
-    headerElement.className = "absolute top-0 left-0 w-full text-center -mt-8 text-gray-700 font-medium";
-    headerElement.textContent = header;
-    timerElement.appendChild(headerElement);
-  }
+  timerElement.dataset.color = color; // Add color to dataset
+  timerElement.dataset.selected = "false";  // Add selected state
 
   // Create SVG elements for the progress ring
   const svgNamespace = "http://www.w3.org/2000/svg";
@@ -36,36 +61,27 @@ export function createTimer(container, duration = 10, color = selectedColor, hea
   svg.classList.add("absolute", "inset-0", "w-full", "h-full");
   svg.setAttribute("viewBox", "0 0 100 100");  // Add viewBox for consistent scaling
 
-  const backgroundCircle = document.createElementNS(svgNamespace, "circle");
-  backgroundCircle.setAttribute("cx", SVG_SIZE/2);
-  backgroundCircle.setAttribute("cy", SVG_SIZE/2);
-  backgroundCircle.setAttribute("stroke", "#e6e6e6");
-  backgroundCircle.setAttribute("stroke-width", STROKE_WIDTH);
-  backgroundCircle.setAttribute("fill", "none");
-  backgroundCircle.setAttribute("r", RADIUS);
-
   const progressCircle = document.createElementNS(svgNamespace, "circle");
   progressCircle.setAttribute("cx", SVG_SIZE/2);
   progressCircle.setAttribute("cy", SVG_SIZE/2);
-  progressCircle.setAttribute("stroke", color);
+  progressCircle.setAttribute("stroke", grayColor); // Start with gray stroke
   progressCircle.setAttribute("stroke-width", STROKE_WIDTH);
   progressCircle.setAttribute("fill", "none");
-  progressCircle.setAttribute("r", RADIUS);
+  progressCircle.setAttribute("r", PROGRESS_RADIUS);
   progressCircle.setAttribute("transform", `rotate(-90, ${SVG_SIZE/2}, ${SVG_SIZE/2})`);
   
   // Set initial stroke properties
-  const circumference = 2 * Math.PI * RADIUS;
+  const circumference = 2 * Math.PI * PROGRESS_RADIUS;
   progressCircle.setAttribute("stroke-dasharray", circumference);
   progressCircle.setAttribute("stroke-dashoffset", circumference.toString()); // Start empty
 
-  svg.appendChild(backgroundCircle);
   svg.appendChild(progressCircle);
 
   timerElement.appendChild(svg);
   
   // Create wrapper for text elements
   const textWrapper = document.createElement("div");
-  textWrapper.className = "flex flex-col items-center justify-center z-10";
+  textWrapper.className = "flex flex-col items-center justify-center z-30 relative";
   
   // Add header text if provided
   if (header) {
@@ -74,6 +90,12 @@ export function createTimer(container, duration = 10, color = selectedColor, hea
     headerText.textContent = header;
     textWrapper.appendChild(headerText);
   }
+  
+  // Add status text
+  const statusText = document.createElement("div");
+  statusText.className = "text-sm text-gray-500 mb-2";
+  statusText.textContent = "Paused";
+  textWrapper.appendChild(statusText);
   
   // Add timer text
   const timerText = document.createElement("span");
@@ -87,10 +109,21 @@ export function createTimer(container, duration = 10, color = selectedColor, hea
   
   timerElement.appendChild(textWrapper);
 
-  // Add click event to start/pause the timer
-  timerElement.addEventListener("click", () => toggleTimer(timerElement));
+  // Replace simple click handler with this version
+  timerElement.addEventListener("click", () => {
+    // Add tap animation
+    timerElement.classList.add('timer-tap');
+    setTimeout(() => timerElement.classList.remove('timer-tap'), 200);
 
-  // Append to container
+    if (isSelectMode) {
+      const isSelected = timerElement.dataset.selected === "true";
+      timerElement.dataset.selected = !isSelected;
+      timerElement.classList.toggle('selected', !isSelected);
+    } else {
+      toggleTimer(timerElement);
+    }
+  });
+
   container.appendChild(timerElement);
 
   // Animate the timer's entrance
@@ -141,11 +174,23 @@ export function toggleTimer(timerElement) {
 }
 
 function startTimer(timerElement) {
-  timerElement.classList.remove('timer-completed'); // Remove pulse if restarting
+  timerElement.classList.remove('timer-completed');
+  timerElement.classList.remove('timer-inactive'); // Remove inactive state
   timerElement.dataset.running = "true";
   const duration = parseFloat(timerElement.dataset.duration);
   const remaining = parseFloat(timerElement.dataset.remaining);
   const startTime = performance.now();
+  const color = timerElement.dataset.color;
+  timerElement.style.borderColor = color;
+  const circle = timerElement.querySelector("circle"); // Changed selector
+  circle.setAttribute("stroke", color);
+
+  // Add pulse animation
+  timerElement.classList.add('timer-pulse');
+  setTimeout(() => timerElement.classList.remove('timer-pulse'), 500);
+
+  // Update status text
+  timerElement.querySelector('.text-sm.text-gray-500').textContent = "Running";
 
   const interval = setInterval(() => {
     const elapsed = (performance.now() - startTime) / 1000;
@@ -177,12 +222,24 @@ function startTimer(timerElement) {
 function stopTimer(timerElement) {
   timerElement.dataset.running = "false";
   clearInterval(timerElement.dataset.intervalId);
+  timerElement.classList.add('timer-inactive'); // Add inactive state
+  const grayColor = "#cbd5e1";
+  const circle = timerElement.querySelector("circle"); // Changed selector
+  circle.setAttribute("stroke", grayColor);
+  timerElement.style.borderColor = grayColor;
+
+  // Add pulse animation
+  timerElement.classList.add('timer-pulse');
+  setTimeout(() => timerElement.classList.remove('timer-pulse'), 500);
+
+  // Update status text
+  timerElement.querySelector('.text-sm.text-gray-500').textContent = "Paused";
 }
 
 // Update timer state styles to use the timer's initial color
 function updateProgress(timerElement, progress) {
-  const circle = timerElement.querySelector("circle:nth-child(2)");
-  const circumference = 2 * Math.PI * RADIUS;
+  const circle = timerElement.querySelector("circle"); // Changed selector
+  const circumference = 2 * Math.PI * PROGRESS_RADIUS;
   // Modify the dashOffset calculation to fill up
   const dashOffset = ((100 - progress) / 100) * circumference;
   circle.style.transition = 'stroke-dashoffset 0.1s ease-out, stroke 0.3s ease';

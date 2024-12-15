@@ -36,6 +36,11 @@
   border-radius: 50%;
   margin: 0 auto;
   transition: all 0.3s ease;
+  box-sizing: border-box;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  overflow: visible !important;
 }
 
 #timer-container {
@@ -76,18 +81,22 @@
 
 /* Timer state styles */
 .timer[data-running="true"] {
-  box-shadow: 0 0 15px rgba(52, 152, 219, 0.5);
+  box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
 }
 
-.timer[data-running="true"] circle:nth-child(2) {
-  stroke: #3498db;
-}
-
+/* Update border color for completed state */
 .timer[data-remaining="0"] {
+  border-color: #2ecc71 !important;
   box-shadow: 0 0 15px rgba(46, 204, 113, 0.5);
 }
 
-.timer[data-remaining="0"] circle:nth-child(2) {
+/* Timer state styles */
+.timer-inactive {
+  background-color: #f1f5f9 !important;
+}
+
+/* Keep the completed state color */
+.timer[data-remaining="0"] circle {
   stroke: #2ecc71;
 }
 
@@ -95,19 +104,35 @@
   color: #2ecc71;
 }
 
+.timer span,
+.timer div {
+  user-select: none;
+  -webkit-user-select: none;
+}
+
 @keyframes pulse {
   0% {
     transform: scale(1);
-    box-shadow: 0 0 15px rgba(46, 204, 113, 0.5);
+    box-shadow: 0 0 15px rgba(46, 204, 113, 0.3);
   }
   50% {
     transform: scale(1.05);
-    box-shadow: 0 0 20px rgba(46, 204, 113, 0.7);
+    box-shadow: 0 0 20px rgba(46, 204, 113, 0.5);
   }
   100% {
     transform: scale(1);
-    box-shadow: 0 0 15px rgba(46, 204, 113, 0.5);
+    box-shadow: 0 0 15px rgba(46, 204, 113, 0.3);
   }
+}
+
+@keyframes tapPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+.timer-tap {
+  animation: tapPulse 0.2s ease-in-out;
 }
 
 .timer-completed {
@@ -139,4 +164,116 @@ input {
   border: 1px solid #e2e8f0;
   padding: 0.5rem;
   width: 100%;
+}
+
+/* Color picker styles */
+.color-option {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+}
+
+.color-option:hover {
+  transform: scale(1.15);
+  box-shadow: 0 0 10px rgba(0,0,0,0.2);
+}
+
+.color-option.active {
+  border-color: #fff;
+  box-shadow: 0 0 0 2px #000;
+}
+
+/* Select mode styles */
+.timer.selected {
+  box-shadow: 0 0 0 4px #3498db !important;
+  transform: scale(0.95);
+}
+
+.select-mode-active .timer:hover {
+  transform: scale(0.95);
+  cursor: pointer;
+}
+
+#select-mode-toggle {
+  transition: all 0.3s ease;
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  z-index: 50;
+}
+
+#select-mode-toggle.active {
+  background-color: #3498db;
+  color: white;
+}
+
+#select-mode-toggle.active svg {
+  color: white;
+}
+
+#delete-selected {
+  opacity: 0;
+  pointer-events: none;
+  transition: all 0.3s ease;
+  position: fixed;
+  top: 1rem;
+  right: 1rem;
+  transform: translateX(0);
+}
+
+#delete-selected.show {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-3rem); /* Adjust based on select button width (48px) */
+  right: calc(1rem + 3rem); /* Position relative to select button */
+}
+
+/* State icon styles */
+.timer .play-icon,
+.timer .pause-icon {
+  opacity: 0.08;
+  transition: opacity 0.3s ease;
+  position: absolute;
+  z-index: 0;
+}
+
+.timer:hover .play-icon,
+.timer:hover .pause-icon {
+  opacity: 0.12;
+}
+
+/* Update the z-index of the timer content */
+.timer .flex {
+  position: relative;
+  z-index: 1;
+}
+
+.hidden {
+  display: none;
+}
+
+/* Update the timer ring styles */
+.timer circle {
+  stroke: #3498db;
+  stroke-width: 4;
+  stroke-linecap: round;
+  transform: rotate(-90deg);
+  transform-origin: 50% 50%;
+  transition: stroke-dashoffset 0.3s ease;
+  position: relative;
+  z-index: 2;
+}
+
+.timer svg {
+  position: absolute;
+  width: 120%;
+  height: 120%;
+  top: -10%;
+  left: -10%;
+  transform: rotate(0deg);
+  pointer-events: none;
 }
