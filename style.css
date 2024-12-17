@@ -73,8 +73,14 @@
 
 /* Update border color for completed state */
 .timer[data-remaining="0"] {
+  background-color: #2ecc71 !important;
   border-color: #2ecc71 !important;
   box-shadow: 0 0 15px rgba(46, 204, 113, 0.5);
+}
+
+.timer[data-remaining="0"] span,
+.timer[data-remaining="0"] div {
+  color: white !important;
 }
 
 /* Timer state styles */
@@ -82,13 +88,14 @@
   background-color: #f1f5f9 !important;
 }
 
+.timer-inactive span,
+.timer-inactive div {
+  color: #64748b !important;
+}
+
 /* Keep the completed state color */
 .timer[data-remaining="0"] circle {
   stroke: #2ecc71;
-}
-
-.timer[data-remaining="0"] span {
-  color: #2ecc71;
 }
 
 .timer span,

@@ -100,7 +100,7 @@ export function createTimer(container, duration = 10, color = selectedColor, hea
   
   if (header) {
     const headerText = document.createElement("div");
-    headerText.className = "text-base font-medium text-gray-600 mb-1";
+    headerText.className = "text-base font-medium text-white mb-1"; // Changed from text-gray-600
     headerText.textContent = header;
     textWrapper.appendChild(headerText);
   }
@@ -108,9 +108,9 @@ export function createTimer(container, duration = 10, color = selectedColor, hea
   const timerText = document.createElement("span");
   timerText.className = "text-2xl font-semibold flex items-center gap-2";
   timerText.innerHTML = `
-    <span class="remaining">${formatTime(duration)}</span>
-    <span class="text-base text-gray-400">/</span>
-    <span class="text-gray-600">${formatTime(duration)}</span>
+    <span class="remaining text-white">${formatTime(duration)}</span>
+    <span class="text-base text-white opacity-50">/</span>
+    <span class="text-white opacity-75">${formatTime(duration)}</span>
   `;
   textWrapper.appendChild(timerText);
   
@@ -193,6 +193,7 @@ function startTimer(timerElement) {
   
   const color = timerElement.dataset.color;
   timerElement.style.borderColor = color;
+  timerElement.style.backgroundColor = color; // Add this line
   const circle = timerElement.querySelector("circle");
   circle.setAttribute("stroke", color);
 
@@ -232,6 +233,7 @@ function stopTimer(timerElement) {
   clearInterval(timerElement.dataset.intervalId);
   timerElement.classList.add('timer-inactive');
   const grayColor = "#cbd5e1";
+  timerElement.style.backgroundColor = "#f1f5f9"; // Reset background color
   const circle = timerElement.querySelector("circle");
   circle.setAttribute("stroke", grayColor);
   timerElement.style.borderColor = grayColor;
