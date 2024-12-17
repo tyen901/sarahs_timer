@@ -58,12 +58,12 @@ export function createTimer(container, duration = 10, color = selectedColor, hea
   stateIconSvg.setAttribute("viewBox", "0 0 100 100");
 
   const playPath = document.createElementNS(svgNamespace, "path");
-  playPath.classList.add("play-icon", "hidden");
+  playPath.classList.add("play-icon");
   playPath.setAttribute("d", "M35 25L75 50L35 75V25Z");
   playPath.setAttribute("fill", "currentColor");
 
   const pausePath = document.createElementNS(svgNamespace, "path");
-  pausePath.classList.add("pause-icon");
+  pausePath.classList.add("pause-icon", "hidden");
   pausePath.setAttribute("d", "M35 25H45V75H35V25ZM65 25H55V75H65V25Z");
   pausePath.setAttribute("fill", "currentColor");
 
@@ -139,11 +139,11 @@ function updateIconState(timerElement, running) {
   const playIcon = timerElement.querySelector('.play-icon');
   const pauseIcon = timerElement.querySelector('.pause-icon');
   if (running) {
-    playIcon.classList.remove('hidden');
-    pauseIcon.classList.add('hidden');
-  } else {
     playIcon.classList.add('hidden');
     pauseIcon.classList.remove('hidden');
+  } else {
+    playIcon.classList.remove('hidden');
+    pauseIcon.classList.add('hidden');
   }
 }
 
