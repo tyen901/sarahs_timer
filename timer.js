@@ -5,6 +5,25 @@ const STROKE_WIDTH = 4;
 const PROGRESS_RADIUS = (SVG_SIZE / 2) - (STROKE_WIDTH / 2);
 const svgNamespace = "http://www.w3.org/2000/svg";
 
+// Add color constants
+const TIMER_COLORS = {
+  INACTIVE: {
+    background: "#f1f5f9",
+    stroke: "#cbd5e1"
+  },
+  COMPLETED: {
+    background: "#2ecc71",
+    stroke: "#2ecc71"
+  }
+};
+
+// Add color management function
+function setTimerColors(timerElement, { background, stroke }) {
+  timerElement.style.backgroundColor = background;
+  const circle = timerElement.querySelector("circle");
+  circle.setAttribute("stroke", stroke);
+}
+
 function formatTime(seconds) {
   const minutes = Math.floor(seconds / 60);
   const remainingSeconds = Math.floor(seconds % 60);
@@ -95,9 +114,10 @@ export function createTimer(container, duration = 10, color = selectedColor, hea
   const textWrapper = document.createElement("div");
   textWrapper.className = "flex flex-col items-center justify-center z-30 relative";
   
+  let headerText;
   if (header) {
-    const headerText = document.createElement("div");
-    headerText.className = "text-base font-medium text-white mb-1"; // Changed from text-gray-600
+    headerText = document.createElement("div");
+    headerText.className = "text-base font-medium text-gray-600 mb-1"; // Changed from text-white
     headerText.textContent = header;
     textWrapper.appendChild(headerText);
   }
@@ -105,12 +125,20 @@ export function createTimer(container, duration = 10, color = selectedColor, hea
   const timerText = document.createElement("span");
   timerText.className = "text-2xl font-semibold flex items-center gap-2";
   timerText.innerHTML = `
-    <span class="remaining text-white">${formatTime(duration)}</span>
-    <span class="text-base text-white opacity-50">/</span>
-    <span class="text-white opacity-75">${formatTime(duration)}</span>
+    <span class="remaining text-gray-600">${formatTime(duration)}</span>
+    <span class="text-base text-gray-400">/</span>
+    <span class="text-gray-500">${formatTime(duration)}</span>
   `;
   textWrapper.appendChild(timerText);
   
+  // Store references to color-changing elements
+  timerElement.colorElements = {
+    header: headerText || null, // Store null if no header
+    remaining: timerText.querySelector('.remaining'),
+    separator: timerText.querySelector('.text-gray-400'),
+    total: timerText.querySelector('.text-gray-500')
+  };
+
   timerElement.appendChild(textWrapper);
 
   timerElement.addEventListener("click", () => {
@@ -155,6 +183,9 @@ export function toggleTimer(timerElement) {
     timerElement.dataset.completed = "false";
     timerElement.dataset.remaining = timerElement.dataset.duration;
     timerElement.classList.remove('timer-completed');
+    setTimerColors(timerElement, TIMER_COLORS.INACTIVE);
+    // Add these lines to reset text colors
+    setTimerTextColors(timerElement, false);
     updateProgress(timerElement, 0);
     updateTime(timerElement, timerElement.dataset.duration);
     return;
@@ -189,9 +220,9 @@ function startTimer(timerElement) {
   timerElement.dataset.endTime = endTime;
   
   const color = timerElement.dataset.color;
-  timerElement.style.backgroundColor = color; // Add this line
-  const circle = timerElement.querySelector("circle");
-  circle.setAttribute("stroke", color);
+  setTimerColors(timerElement, { background: color, stroke: color });
+
+  setTimerTextColors(timerElement, true);
 
   timerElement.classList.add('timer-pulse');
   setTimeout(() => timerElement.classList.remove('timer-pulse'), 500);
@@ -228,10 +259,9 @@ function stopTimer(timerElement) {
   timerElement.dataset.running = "false";
   clearInterval(timerElement.dataset.intervalId);
   timerElement.classList.add('timer-inactive');
-  const grayColor = "#cbd5e1";
-  timerElement.style.backgroundColor = "#f1f5f9"; // Reset background color
-  const circle = timerElement.querySelector("circle");
-  circle.setAttribute("stroke", grayColor);
+  setTimerColors(timerElement, TIMER_COLORS.INACTIVE);
+
+  setTimerTextColors(timerElement, false);
 
   timerElement.classList.add('timer-pulse');
   setTimeout(() => timerElement.classList.remove('timer-pulse'), 500);
@@ -289,3 +319,22 @@ setInterval(() => {
 
 // Run cleanup on page load
 cleanupOldTimers();
+
+function setTimerTextColors(timerElement, isActive) {
+  const elements = timerElement.colorElements;
+  if (isActive) {
+    if (elements.header) {
+      elements.header.classList.replace('text-gray-600', 'text-white');
+    }
+    elements.remaining.classList.replace('text-gray-600', 'text-white');
+    elements.separator.classList.replace('text-gray-400', 'text-white/50');
+    elements.total.classList.replace('text-gray-500', 'text-white/75');
+  } else {
+    if (elements.header) {
+      elements.header.classList.replace('text-white', 'text-gray-600');
+    }
+    elements.remaining.classList.replace('text-white', 'text-gray-600');
+    elements.separator.classList.replace('text-white/50', 'text-gray-400');
+    elements.total.classList.replace('text-white/75', 'text-gray-500');
+  }
+}
