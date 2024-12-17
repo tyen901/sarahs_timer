@@ -29,6 +29,7 @@
   max-width: 350px;
   max-height: 350px;
   border-radius: 50%;
+  border-width: 8px !important;
   margin: 0 auto;
   transition: all 0.3s ease;
   box-sizing: border-box;
@@ -215,10 +216,9 @@ input {
   opacity: 1;
   pointer-events: auto;
   transform: translateX(-6rem);
-  right: calc(1rem + 3rem); /* Position relative to select button */
+  right: calc(1rem + 3rem);
 }
 
-/* Update select mode button styles */
 #select-mode-toggle,
 #select-all,
 #delete-selected {
