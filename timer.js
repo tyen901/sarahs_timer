@@ -43,9 +43,6 @@ export function createTimer(container, duration = 10, color = selectedColor, hea
   today.setHours(0, 0, 0, 0);
   
   timerElement.className = "timer bg-white shadow-2xl rounded-full flex items-center justify-center relative overflow-visible timer-inactive my-4";
-  timerElement.style.borderWidth = `${STROKE_WIDTH}px`;
-  timerElement.style.borderStyle = "solid";
-  timerElement.style.borderColor = grayColor;
   timerElement.style.padding = `${STROKE_WIDTH * 2}px`;
   timerElement.dataset.id = Date.now();
   timerElement.dataset.duration = duration;
@@ -192,7 +189,6 @@ function startTimer(timerElement) {
   timerElement.dataset.endTime = endTime;
   
   const color = timerElement.dataset.color;
-  timerElement.style.borderColor = color;
   timerElement.style.backgroundColor = color; // Add this line
   const circle = timerElement.querySelector("circle");
   circle.setAttribute("stroke", color);
@@ -236,7 +232,6 @@ function stopTimer(timerElement) {
   timerElement.style.backgroundColor = "#f1f5f9"; // Reset background color
   const circle = timerElement.querySelector("circle");
   circle.setAttribute("stroke", grayColor);
-  timerElement.style.borderColor = grayColor;
 
   timerElement.classList.add('timer-pulse');
   setTimeout(() => timerElement.classList.remove('timer-pulse'), 500);

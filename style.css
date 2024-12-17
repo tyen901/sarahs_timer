@@ -29,7 +29,6 @@
   max-width: 350px;
   max-height: 350px;
   border-radius: 50%;
-  border-width: 8px !important;
   margin: 0 auto;
   transition: all 0.3s ease;
   box-sizing: border-box;
@@ -71,10 +70,9 @@
   box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
 }
 
-/* Update border color for completed state */
+/* Update completed state - remove border references */
 .timer[data-remaining="0"] {
   background-color: #2ecc71 !important;
-  border-color: #2ecc71 !important;
   box-shadow: 0 0 15px rgba(46, 204, 113, 0.5);
 }
 
