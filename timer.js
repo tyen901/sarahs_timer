@@ -50,6 +50,7 @@ export function createTimer(container, duration = 10, color = selectedColor, hea
   timerElement.dataset.completed = "false";
   timerElement.dataset.color = color;
   timerElement.dataset.selected = "false";
+  timerElement.dataset.createdAt = Date.now(); // Add creation timestamp
 
   const stateIconSvg = document.createElementNS(svgNamespace, "svg");
   stateIconSvg.classList.add("absolute", "inset-0", "w-full", "h-full", "pointer-events-none", "state-icon");
@@ -249,3 +250,47 @@ function updateProgress(timerElement, progress) {
 function updateTime(timerElement, time) {
   timerElement.querySelector(".remaining").textContent = formatTime(time);
 }
+
+// Add new function for timer cleanup
+function cleanupOldTimers() {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const todayTimestamp = today.getTime();
+
+  document.querySelectorAll('.timer').forEach(timer => {
+    const createdAt = parseInt(timer.dataset.createdAt);
+    if (createdAt < todayTimestamp) {
+      gsap.to(timer, {
+        scale: 0,
+        opacity: 0,
+        duration: 0.3,
+        onComplete: () => timer.remove()
+      });
+    }
+  });
+}
+
+// Add visibility change detection
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') {
+    cleanupOldTimers();
+  }
+});
+
+// Add wake detection using timestamp comparison
+let lastActiveTime = Date.now();
+
+setInterval(() => {
+  const now = Date.now();
+  const timeSinceLastActive = now - lastActiveTime;
+  
+  // If more than 1 second has passed between checks, device might have slept
+  if (timeSinceLastActive > 1000) {
+    cleanupOldTimers();
+  }
+  
+  lastActiveTime = now;
+}, 1000);
+
+// Run cleanup on page load
+cleanupOldTimers();
