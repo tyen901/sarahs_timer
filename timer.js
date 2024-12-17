@@ -197,26 +197,29 @@ export function toggleTimer(timerElement) {
 
 function startTimer(timerElement) {
   timerElement.classList.remove('timer-completed');
-  timerElement.classList.remove('timer-inactive'); // Remove inactive state
+  timerElement.classList.remove('timer-inactive');
   timerElement.dataset.running = "true";
+  
   const duration = parseFloat(timerElement.dataset.duration);
   const remaining = parseFloat(timerElement.dataset.remaining);
-  const startTime = performance.now();
+  // Store the absolute end time instead of start time
+  const endTime = Date.now() + (remaining * 1000);
+  timerElement.dataset.endTime = endTime;
+  
   const color = timerElement.dataset.color;
   timerElement.style.borderColor = color;
   const circle = timerElement.querySelector("circle");
-  circle.setAttribute("stroke", color);  // This line was already correct
+  circle.setAttribute("stroke", color);
 
-  // Add pulse animation
   timerElement.classList.add('timer-pulse');
   setTimeout(() => timerElement.classList.remove('timer-pulse'), 500);
 
   const interval = setInterval(() => {
-    const elapsed = (performance.now() - startTime) / 1000;
-    const newRemaining = Math.max(remaining - elapsed, 0);
+    const now = Date.now();
+    const remainingMs = Math.max(0, endTime - now);
+    const newRemaining = remainingMs / 1000;
     timerElement.dataset.remaining = newRemaining;
 
-    // Invert the progress calculation here
     const progress = ((duration - newRemaining) / duration) * 100;
     updateProgress(timerElement, progress);
     updateTime(timerElement, newRemaining);
@@ -236,7 +239,7 @@ function startTimer(timerElement) {
   }, 1000 / 60);
 
   timerElement.dataset.intervalId = interval;
-  updateIconState(timerElement, true); // Update to pass timerElement
+  updateIconState(timerElement, true);
 }
 
 function stopTimer(timerElement) {
